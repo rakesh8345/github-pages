@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    .calculator {
+      background: #222;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      width: 320px;
+    }
+    
+    .display {
+      background: #000;
+      color: #0f0;
+      font-size: 2.5rem;
+      text-align: right;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      min-height: 60px;
+      overflow: hidden;
+      letter-spacing: 2px;
+    }
+    
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    button {
+      padding: 20px;
+      font-size: 1.4rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      transform: scale(0.95);
+      opacity: 0.9;
+    }
+    
+    .number, .decimal {
+      background: #333;
+      color: white;
+    }
+    
+    .operator {
+      background: #ff9500;
+      color: white;
+    }
+    
+    .equals {
+      background: #00c853;
+      color: white;
+    }
+    
+    .clear {
+      background: #f44336;
+      color: white;
+      grid-column: span 2;
+    }
+    
+    .zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display" id="display">0</div>
+    
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="operator" onclick="appendToDisplay('/')">/</button>
+      <button class="operator" onclick="appendToDisplay('*')">×</button>
+      
+      <button class="number" onclick="appendToDisplay('7')">7</button>
+      <button class="number" onclick="appendToDisplay('8')">8</button>
+      <button class="number" onclick="appendToDisplay('9')">9</button>
+      <button class="operator" onclick="appendToDisplay('-')">-</button>
+      
+      <button class="number" onclick="appendToDisplay('4')">4</button>
+      <button class="number" onclick="appendToDisplay('5')">5</button>
+      <button class="number" onclick="appendToDisplay('6')">6</button>
+      <button class="operator" onclick="appendToDisplay('+')">+</button>
+      
+      <button class="number" onclick="appendToDisplay('1')">1</button>
+      <button class="number" onclick="appendToDisplay('2')">2</button>
+      <button class="number" onclick="appendToDisplay('3')">3</button>
+      <button class="equals" onclick="calculate()" rowspan="2">=</button>
+      
+      <button class="number zero" onclick="appendToDisplay('0')">0</button>
+      <button class="decimal" onclick="appendToDisplay('.')">.</button>
+    </div>
+  </div>
+
+  <script>
+    let display = document.getElementById('display');
+    let currentInput = '0';
+    let shouldResetDisplay = false;
+
+    function appendToDisplay(value) {
+      if (shouldResetDisplay) {
+        currentInput = '0';
+        shouldResetDisplay = false;
+      }
+      
+      if (currentInput === '0' && value !== '.') {
+        currentInput = value;
+      } else {
+        currentInput += value;
+      }
+      
+      display.textContent = currentInput;
+    }
+
+    function clearDisplay() {
+      currentInput = '0';
+      display.textContent = currentInput;
+    }
+
+    function calculate() {
+      try {
+        // Replace × with * for evaluation
+        let expression = currentInput.replace(/×/g, '*');
+        let result = Function('"use strict"; return (' + expression + ')')();
+        
+        // Round to avoid floating point issues
+        result = Math.round(result * 100000000) / 100000000;
+        
+        display.textContent = result;
+        currentInput = result.toString();
+        shouldResetDisplay = true;
+      } catch (e) {
+        display.textContent = 'Error';
+        shouldResetDisplay = true;
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+      if (e.key >= '0' && e.key <= '9') appendToDisplay(e.key);
+      if (e.key === '.') appendToDisplay('.');
+      if (e.key === '+') appendToDisplay('+');
+      if (e.key === '-') appendToDisplay('-');
+      if (e.key === '*') appendToDisplay('*');
+      if (e.key === '/') appendToDisplay('/');
+      if (e.key === 'Enter' || e.key === '=') calculate();
+      if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') clearDisplay();
+      if (e.key === 'Backspace') {
+        currentInput = currentInput.slice(0, -1) || '0';
+        display.textContent = currentInput;
+      }
+    });
+  </script>
+</body>
+</html>
